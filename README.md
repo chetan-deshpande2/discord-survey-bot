@@ -44,4 +44,4 @@ cp .env.example .env # Fill in your DB and Discord creds
 - `/buy` / `/sell`: Simulated trading.
 - `/alert`: Set price notifications.
 - `/survey-results` (Admin): Stats & CSV export.
-- `/survey-trends` (Admin): Daily participation table.
+- `/survey-trends` (Admin): Daily participation table
