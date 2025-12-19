@@ -25,6 +25,22 @@ A high-performance, "unkillable" Discord bot built with **TypeScript**, **Node.j
 
 ---
 
+## ⚙️ Discord Developer Portal Setup
+
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications).
+2. Click **New Application** and give your bot a name.
+3. Navigate to the **Bot** tab on the left.
+4. Click **Reset Token** (or **Copy Token**) to get your `DISCORD_TOKEN`. 
+5. Scroll down to the **Privileged Gateway Intents** section and enable:
+   - **Server Members Intent** (Required for tracking completion)
+   - **Message Content Intent** (Required for reading commands/responses)
+6. Navigate to **OAuth2** -> **URL Generator**:
+   - Scopes: `bot`, `applications.commands`
+   - Bot Permissions: `Administrator` (or provide specific permissions like `Send Messages`, `Embed Links`, etc.)
+7. Copy the generated URL and paste it into your browser to invite the bot to your server.
+
+---
+
 ## 🛠️ Quick Setup
 
 ### 1. Prerequisites
