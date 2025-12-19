@@ -36,7 +36,11 @@ A high-performance, "unkillable" Discord bot built with **TypeScript**, **Node.j
    - **Message Content Intent** (Required for reading commands/responses)
 6. Navigate to **OAuth2** -> **URL Generator**:
    - Scopes: `bot`, `applications.commands`
-   - Bot Permissions: `Administrator` (or provide specific permissions like `Send Messages`, `Embed Links`, etc.)
+   - Bot Permissions (Strictly Required):
+     - `Send Messages`
+     - `Embed Links`
+     - `Attach Files` (Required for survey CSV exports)
+     - `Use External Emojis`
 7. Copy the generated URL and paste it into your browser to invite the bot to your server.
 
 ---
