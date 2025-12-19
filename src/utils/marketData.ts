@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { createChildLogger } from './logger';
+
+const logger = createChildLogger('MarketData');
 
 export interface MarketData {
     symbol: string;
@@ -51,7 +54,7 @@ export const getCryptoPrice = async (symbol: string): Promise<MarketData | null>
                 low24h = raw.LOW24HOUR;
             }
         } catch (ccError) {
-            console.error(`[DEBUG] Error fetching 24h metrics for ${symbol}:`, ccError);
+            logger.debug(`Could not fetch 24h metrics for ${symbol}, using price only`, { error: ccError });
         }
 
         const marketData: MarketData = {
@@ -66,7 +69,7 @@ export const getCryptoPrice = async (symbol: string): Promise<MarketData | null>
         cache.set(symbol, { data: marketData, timestamp: Date.now() });
         return marketData;
     } catch (error) {
-        console.error(`Error fetching crypto price for ${symbol}:`, error);
+        logger.error(`API failure while fetching price for ${symbol}`, { error });
         return null;
     }
 };
@@ -94,7 +97,7 @@ export const getHistory = async (symbol: string): Promise<number[]> => {
         }
         return [];
     } catch (error) {
-        console.error('Error fetching history:', error);
+        logger.error('API failure while fetching price history', { symbol, error });
         return [];
     }
 };

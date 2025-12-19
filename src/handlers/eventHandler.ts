@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { ExtendedClient } from '../types';
+import { createChildLogger } from '../utils/logger';
+
+const logger = createChildLogger('EventHandler');
 
 export async function loadEvents(client: ExtendedClient) {
     const eventsPath = path.join(__dirname, '../events');
@@ -13,5 +16,6 @@ export async function loadEvents(client: ExtendedClient) {
         } else {
             client.on(event.name, (...args) => event.execute(...args));
         }
+        logger.debug(`Registered event listener: ${event.name}`);
     }
 }

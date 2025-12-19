@@ -1,7 +1,9 @@
 import { Events, Interaction, MessageFlags } from 'discord.js';
 import { ExtendedClient } from '../types';
 import { handleCreateSurveyModal } from '../commands/createSurvey';
-import { instanceId } from '../index';
+import { createChildLogger } from '../utils/logger';
+
+const logger = createChildLogger('InteractionHandler');
 
 export const event = {
     name: Events.InteractionCreate,
@@ -9,16 +11,18 @@ export const event = {
     async execute(interaction: Interaction) {
         const client = interaction.client as ExtendedClient;
 
-        // Helpful for debugging multi-instance issues if they crop up
-        console.log(`[Interaction] ${interaction.id} | User: ${interaction.user.tag} | Instance: ${instanceId}`);
+        // Structured log for every interaction
+        logger.debug('Received interaction', {
+            id: interaction.id,
+            user: interaction.user.tag,
+            type: interaction.type
+        });
 
-        // Handle modal submissions
         if (interaction.isModalSubmit()) {
             const handled = await handleCreateSurveyModal(interaction);
             if (handled) return;
         }
 
-        // Skip button and select menu interactions - they're handled by message collectors
         if (interaction.isButton() || interaction.isStringSelectMenu()) {
             return;
         }
@@ -27,14 +31,22 @@ export const event = {
             const command = client.commands.get(interaction.commandName);
 
             if (!command) {
-                console.error(`No command matching ${interaction.commandName} was found.`);
+                logger.error(`No command matching ${interaction.commandName} was found.`);
                 return;
             }
 
             try {
                 await command.execute(interaction);
+                logger.info('Command executed successfully', {
+                    command: interaction.commandName,
+                    user: interaction.user.tag
+                });
             } catch (error) {
-                console.error(error);
+                logger.error('Error executing command', {
+                    command: interaction.commandName,
+                    error
+                });
+
                 if (interaction.replied || interaction.deferred) {
                     await interaction.followUp({ content: 'There was an error while executing this command!', flags: [MessageFlags.Ephemeral] });
                 } else {
@@ -44,15 +56,12 @@ export const event = {
         } else if (interaction.isAutocomplete()) {
             const command = client.commands.get(interaction.commandName);
 
-            if (!command) {
-                console.error(`No command matching ${interaction.commandName} was found.`);
-                return;
-            }
+            if (!command) return;
 
             try {
                 await command.autocomplete(interaction);
             } catch (error) {
-                console.error(error);
+                logger.error('Autocomplete Error', { command: interaction.commandName, error });
             }
         }
     },

@@ -7,10 +7,12 @@ import { loadEvents } from './handlers/eventHandler';
 import { startAlertService } from './services/alertService';
 import { ExtendedClient } from './types';
 
+// Instance identifier exported for logger and context
 export const instanceId = Math.random().toString(36).substring(7);
-// Initial log handled in init() with chalk
 
 dotenv.config();
+
+import { logger } from './utils/logger';
 
 const client = new Client({
     intents: [
@@ -22,38 +24,36 @@ const client = new Client({
 
 client.commands = new Collection();
 
-// Global error handlers to keep the process alive
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Promise Rejection:', reason);
+// Global resilience handlers
+process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled Promise Rejection', { reason });
 });
 
 process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err.message);
+    logger.error('Uncaught Exception', { message: err.message, stack: err.stack });
 });
 
-client.on('error', (err) => console.error(`Client Error (${instanceId}):`, err));
-client.on('shardError', (err) => console.error(`Gateway Connection Issue (${instanceId}):`, err));
+client.on('error', (err) => logger.error('Discord Client Error', { error: err }));
+client.on('shardError', (err) => logger.error('Discord Shard Connection Issue', { error: err }));
 
 async function init() {
-    const chalk = (await import('chalk')).default;
-
     try {
-        console.log(chalk.cyan(`[Startup] ID: ${instanceId}`));
+        logger.info('Initializing bot startup sequence');
 
         await connectDatabase();
-        console.log(chalk.green('Connected to database'));
+        logger.info('Database connection established');
 
         await loadEvents(client);
         await loadCommands(client);
-        console.log(chalk.green(`Loaded ${client.commands.size} commands and events`));
+        logger.info(`Ready: ${client.commands.size} commands and events registered`);
 
         startAlertService(client);
-        console.log(chalk.yellow('Price monitoring active'));
+        logger.info('Price alert background service active');
 
         await client.login(process.env.DISCORD_TOKEN);
-        console.log(chalk.blue.bold(`Logged in as ${client.user?.tag}`));
+        logger.info(`Bot successfully logged in as ${client.user?.tag}`);
     } catch (err) {
-        console.error(chalk.red.bold('Initialization failed:'), err);
+        logger.error('Critical initialization failure', { error: err });
         process.exit(1);
     }
 }

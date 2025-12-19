@@ -11,6 +11,9 @@ import {
 import { AppDataSource } from '../config/database';
 import { Survey } from '../models/Survey';
 import { SurveyQuestion } from '../models/SurveyQuestion';
+import { createChildLogger } from '../utils/logger';
+
+const logger = createChildLogger('SurveyCreation');
 
 export const command = {
     data: new SlashCommandBuilder()
@@ -123,7 +126,7 @@ export async function handleCreateSurveyModal(interaction: any) {
             `Use \`/activate-survey\` when you're ready to go live.`
         );
     } catch (err: any) {
-        console.error('Survey creation failed:', err);
+        logger.error('Survey creation failed', { error: err });
         await interaction.editReply(`Failed to create survey: ${err.message}`);
     }
 

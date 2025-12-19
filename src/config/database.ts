@@ -6,6 +6,9 @@ import { Alert } from '../models/Alert';
 import { Survey } from '../models/Survey';
 import { SurveyQuestion } from '../models/SurveyQuestion';
 import { SurveyResponse } from '../models/SurveyResponse';
+import { createChildLogger } from '../utils/logger';
+
+const logger = createChildLogger('Database');
 
 dotenv.config();
 
@@ -26,9 +29,9 @@ export const AppDataSource = new DataSource({
 export const connectDatabase = async () => {
     try {
         await AppDataSource.initialize();
-        console.log("DB connection established");
+        logger.info('Database connection established');
     } catch (err) {
-        console.error("Database connection failed:", err);
+        logger.error('Database connection failed', { error: err });
         process.exit(1);
     }
 };

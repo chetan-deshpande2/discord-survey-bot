@@ -4,6 +4,9 @@ import { Alert, AlertCondition } from '../models/Alert';
 import { ensureUser } from '../services/userService';
 import { getPrice } from '../utils/marketData';
 import { formatCurrency } from '../utils/formatters';
+import { createChildLogger } from '../utils/logger';
+
+const logger = createChildLogger('AlertCommand');
 
 export const command = {
     data: new SlashCommandBuilder()
@@ -45,7 +48,7 @@ export const command = {
                 timeout
             ]);
         } catch (err: any) {
-            console.error('Autocomplete failed:', err.message);
+            logger.error('Autocomplete interaction failure', { error: err.message });
         }
     },
     async execute(interaction: any) {
@@ -88,7 +91,7 @@ export const command = {
 
             await interaction.editReply(message);
         } catch (err) {
-            console.error('Alert command error:', err);
+            logger.error('Alert command execution failure', { error: err });
             if (interaction.deferred || interaction.replied) {
                 await interaction.editReply('Something went wrong while setting your alert. Please try again later.');
             }

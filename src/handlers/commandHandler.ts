@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { REST, Routes } from 'discord.js';
 import { ExtendedClient } from '../types';
+import { createChildLogger } from '../utils/logger';
+
+const logger = createChildLogger('CommandHandler');
 
 export async function loadCommands(client: ExtendedClient) {
     const commandsPath = path.join(__dirname, '../commands');
@@ -12,25 +15,27 @@ export async function loadCommands(client: ExtendedClient) {
         const filePath = path.join(commandsPath, file);
         const { command } = await import(filePath);
 
-        if ('data' in command && 'execute' in command) {
+        if (command && 'data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command);
             commands.push(command.data.toJSON());
+            logger.debug(`Loaded command: ${command.data.name}`);
         } else {
-            console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+            logger.warn(`Skipping invalid command file: ${file}`);
         }
     }
 
-    // Registry
     const rest = new REST().setToken(process.env.DISCORD_TOKEN!);
 
     try {
-        console.log(`Syncing ${commands.length} slash commands...`);
+        logger.info(`Syncing ${commands.length} slash commands`);
 
         await rest.put(
             Routes.applicationGuildCommands(process.env.CLIENT_ID!, process.env.GUILD_ID!),
             { body: commands },
         );
+
+        logger.info('Slash commands synchronized successfully');
     } catch (error: any) {
-        console.error(error);
+        logger.error('Failed to sync slash commands', { error });
     }
 }
