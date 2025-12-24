@@ -7,12 +7,10 @@ import { loadEvents } from './handlers/eventHandler';
 import { startAlertService } from './services/alertService';
 import { ExtendedClient } from './types';
 
-// Instance identifier exported for logger and context
-export const instanceId = Math.random().toString(36).substring(7);
-
 dotenv.config();
 
 import { logger } from './utils/logger';
+export { instanceId } from './utils/logger';
 
 const client = new Client({
     intents: [

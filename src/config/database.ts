@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USERNAME || "postgres",
     password: process.env.DB_PASSWORD || "password",
     database: process.env.DB_NAME || "discord_trading_bot",
-    synchronize: true, // Auto-create tables (dev only)
+    synchronize: process.env.NODE_ENV !== 'production', // Auto-create tables (dev only)
     logging: false,
     entities: [User, PortfolioItem, Alert, Survey, SurveyQuestion, SurveyResponse],
     subscribers: [],

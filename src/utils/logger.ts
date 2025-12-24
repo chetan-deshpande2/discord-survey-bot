@@ -1,6 +1,9 @@
 import winston from 'winston';
 import chalk from 'chalk';
-import { instanceId } from '../index';
+import 'winston-daily-rotate-file';
+
+// Moved from index.ts to break circular dependency for TypeORM CLI
+export const instanceId = Math.random().toString(36).substring(7);
 
 const { combine, timestamp, printf, colorize, json, errors } = winston.format;
 
@@ -18,6 +21,17 @@ const devFormat = printf(({ level, message, timestamp, stack, ...metadata }) => 
     return `${ts} ${id} ${level}: ${msg}${metaStr}`;
 });
 
+// File transport for production
+const fileTransport = new winston.transports.DailyRotateFile({
+    filename: 'logs/application-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: json()
+});
+
+
 // Create the logger
 export const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
@@ -31,7 +45,8 @@ export const logger = winston.createLogger({
             format: process.env.NODE_ENV === 'production'
                 ? json()
                 : combine(colorize(), devFormat)
-        })
+        }),
+        ...(process.env.NODE_ENV === 'production' ? [fileTransport] : [])
     ]
 });
 
