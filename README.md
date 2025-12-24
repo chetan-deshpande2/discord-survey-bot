@@ -2,7 +2,7 @@
 
 A production-ready Discord bot built with **TypeScript**, **Node.js 20**, and **TypeORM**. It features a robust survey engine with conditional logic and localized crypto trading simulations.
 
-## 🚀 Features
+## Features
 - **Smart Surveys**: Conditional questions, optional skipping, and real-time refreshable dashboards.
 - **Admin Tools**: Create surveys via modals, export results to CSV, and track participation trends.
 - **Trading Engine**: Real-time pricing via CoinGate, portfolio tracking, and price alerts.
@@ -37,7 +37,7 @@ cp .env.example .env # Fill in your DB and Discord creds
 
 ---
 
-## 📜 Commands
+## Commands
 - `/survey`: Take an active survey.
 - `/my-surveys`: View your completion progress.
 - `/price`: Current market data.
