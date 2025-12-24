@@ -53,7 +53,7 @@ async function init() {
         await client.login(process.env.DISCORD_TOKEN);
         logger.info(`Bot successfully logged in as ${client.user?.tag}`);
     } catch (err) {
-        logger.error('Critical initialization failure', { error: err });
+        logger.error('initialization failure', { error: err });
         process.exit(1);
     }
 }

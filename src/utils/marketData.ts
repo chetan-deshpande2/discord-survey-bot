@@ -14,8 +14,12 @@ export interface MarketData {
 
 const COINGATE_API_URL = process.env.COINGATE_API_URL || 'https://api.coingate.com/v2';
 
-// Cache to prevent hitting rate limits
-const cache: Map<string, { data: MarketData, timestamp: number }> = new Map();
+// Persistent cache to handle concurrent requests during cron bursts
+interface CacheEntry {
+    data: MarketData;
+    timestamp: number;
+}
+const cache: Map<string, CacheEntry> = new Map();
 const CACHE_DURATION = 60 * 1000; // 1 minute
 
 export const getCryptoPrice = async (symbol: string): Promise<MarketData | null> => {
@@ -102,18 +106,31 @@ export const getHistory = async (symbol: string): Promise<number[]> => {
     }
 };
 
-export const getSparklineUrl = (prices: number[], color: string = 'rgb(75, 192, 192)'): string => {
+export const getSparklineUrl = (prices: number[]): string => {
+    if (prices.length < 2) return '';
+
+    const isPositive = prices[prices.length - 1] >= prices[0];
+    // Avant-Garde Palette: Matrix Green for growth, Electric Crimson for decline
+    const color = isPositive ? 'rgb(0, 255, 163)' : 'rgb(255, 62, 0)';
+
     const chartConfig = {
         type: 'sparkline',
         data: {
-            labels: prices.map((_, i) => i), // Dummy labels
+            labels: prices.map((_, i) => i),
             datasets: [{
                 data: prices,
                 fill: true,
                 borderColor: color,
-                backgroundColor: color.replace('rgb', 'rgba').replace(')', ', 0.2)'),
+                borderWidth: 2,
+                backgroundColor: color.replace('rgb', 'rgba').replace(')', ', 0.1)'),
                 pointRadius: 0,
+                lineTension: 0.4, // Smooth "aesthetic" curves
             }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false }
+            }
         }
     };
     return `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`;
